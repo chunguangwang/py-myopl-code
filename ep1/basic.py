@@ -14,10 +14,10 @@ class Error:
         self.pos_end = pos_end
         self.error_name = error_name
         self.details = details
-    
+
     def as_string(self):
-        result  = f'{self.error_name}: {self.details}\n'
-        result += f'File {self.pos_start.fn}, line {self.pos_start.ln + 1}'
+        result = f'{self.error_name}: {self.details}'
+        result += f' File {self.pos_start.fn}, line {self.pos_start.ln + 1}, col {self.pos_start.idx}'
         return result
 
 class IllegalCharError(Error):
@@ -66,7 +66,7 @@ class Token:
     def __init__(self, type_, value=None):
         self.type = type_
         self.value = value
-    
+
     def __repr__(self):
         if self.value: return f'{self.type}:{self.value}'
         return f'{self.type}'
@@ -82,7 +82,7 @@ class Lexer:
         self.pos = Position(-1, 0, -1, fn, text)
         self.current_char = None
         self.advance()
-    
+
     def advance(self):
         self.pos.advance(self.current_char)
         self.current_char = self.text[self.pos.idx] if self.pos.idx < len(self.text) else None
@@ -114,11 +114,11 @@ class Lexer:
                 tokens.append(Token(TT_RPAREN))
                 self.advance()
             else:
+                # return some error
                 pos_start = self.pos.copy()
                 char = self.current_char
                 self.advance()
                 return [], IllegalCharError(pos_start, self.pos, "'" + char + "'")
-
         return tokens, None
 
     def make_number(self):
